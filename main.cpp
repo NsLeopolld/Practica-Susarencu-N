@@ -6,6 +6,7 @@
 using namespace std;
 
 ifstream finC("Candidat.txt");
+ifstream finN("Examen.txt");
 
 int main() {
     bool running = true;
@@ -18,17 +19,58 @@ int main() {
                 running = false;
                 break;
             case 1:
-                while(getline(finC, lines)) {
+                while (getline(finC, lines)) {
                     cout << lines << "\n";
-                    cout << "\n";
                 }
-                break;
-            case 2:
-                
+                finC.clear();
+                finC.seekg(0);
+                cout << "\nPress RETURN to continue...";
+                cin.ignore();
+                cin.get();
+                ClearScreen();
                 break;
 
+            case 2:
+                while (getline(finN, lines)) {
+                    cout << lines << "\n";
+                }
+                finN.clear();
+                finN.seekg(0);
+                cout << "\nPress RETURN to continue...";
+                cin.ignore();
+                cin.get();
+                ClearScreen();
+                break;
+            case 3:
+                addCandidat();
+                cout << "\nPress RETURN to continue...";
+                cin.ignore();
+                cin.get();
+                ClearScreen();
+                break;
+            case 4:
+                addGrades();
+                cout << "\nPress RETURN to continue...";
+                cin.ignore();
+                cin.get();
+                ClearScreen();
+                break;
+            case 5:
+                deleteCandidat();
+                cout << "\nPress RETURN to continue...";
+                cin.ignore();
+                cin.get();
+                ClearScreen();
+                break;
+            case 6:
+                deleteGrades();
+                cout << "\nPress RETURN to continue...";
+                cin.ignore();
+                cin.get();
+                ClearScreen();
+                break;
             default:
-                cout << "Optiune invalida, incercati din nou.\n\n";
+                cout << "!!!Error!!! invalid option\n\n";
                 break;
         }
     }

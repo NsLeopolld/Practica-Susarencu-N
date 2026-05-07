@@ -4,5 +4,9 @@
 void ClearScreen();
 void welcome();
 int menu();
+void addCandidat();
+void addGrades();
+void deleteCandidat();
+void deleteGrades();
 
 #endif
