@@ -5,8 +5,6 @@
 #include <string>
 #include <cstdio>
 
-
-
 void ClearScreen() {
 #ifdef _WIN32
     std::system("cls");
@@ -130,7 +128,6 @@ void deleteCandidat() {
         std::cout << "Candidat nu gasit.\n";
         return;
     }
-    // Remove from Candidat.txt
     std::ifstream finC2("Candidat.txt");
     std::ofstream foutC("tempC.txt");
     while (std::getline(finC2, line)) {
@@ -144,7 +141,6 @@ void deleteCandidat() {
     foutC.close();
     std::remove("Candidat.txt");
     std::rename("tempC.txt", "Candidat.txt");
-    // Remove from Examen.txt
     std::ifstream finE("Examen.txt");
     std::ofstream foutE("tempE.txt");
     while (std::getline(finE, line)) {
