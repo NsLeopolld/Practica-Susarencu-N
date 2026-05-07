@@ -19,7 +19,8 @@ int main() {
                 break;
             case 1:
                 while(getline(finC, lines)) {
-                    
+                    cout << lines << "\n";
+                    cout << "\n";
                 }
                 break;
             case 2:

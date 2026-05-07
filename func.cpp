@@ -31,6 +31,7 @@ int menu() {
     std::cout << "10. Afisarea pe ecran, in ordine alfabetica, a tuturor candidatilor care sustin examenul la disciplina la alegere\n";
     std::cout << "11. Afisarea pe ecran a informatiei despre candidatul cu cea mai mare medie\n";
     std::cout << "12. Afisarea pe ecran a numarului de restantieri\n";
+    std::cout << "0. Exit program\n";
     std::cout << "Selectati o optiune de mai sus: ";
     std::cin >> selection;
     std::cout << "\n";
