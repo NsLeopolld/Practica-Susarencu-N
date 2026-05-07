@@ -69,7 +69,7 @@ void addCandidat() {
     std::cout << "Introduceti disciplina: ";
     std::getline(std::cin, disciplina);
     std::ofstream fout("Candidat.txt", std::ios::app);
-    fout << newId << " | " << nume << " " << prenume << " | " << scoala << " | " << profil << " | " << limba << " | " << disciplina << "\n";
+    fout << newId << " | " << nume << " " << prenume << " | " << scoala << " | " << profil << " | " << limba << " | " << disciplina << "\n\n";
     fout.close();
     std::cout << "Candidat adaugat cu ID: " << newId << "\n";
 }
@@ -86,7 +86,7 @@ void addGrades() {
     std::cout << "Introduceti nota 3: ";
     std::cin >> nota3;
     std::ofstream fout("Examen.txt", std::ios::app);
-    fout << id << " " << nota1 << " " << nota2 << " " << nota3 << "\n";
+    fout << id << " " << nota1 << " " << nota2 << " " << nota3 << "\n\n";
     fout.close();
     std::cout << "Note adaugate pentru ID: " << id << "\n";
 }

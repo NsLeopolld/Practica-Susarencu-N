@@ -28,3 +28,5 @@
 1028 | Iliescu Mihai | Liceul Teoretic Nr.2 | Uman | Romana | Geografie
 1029 | Voicu Elena | Liceul Pedagogic | Real | Engleza | Fizica
 1030 | Constantinescu Andrei | Scoala Gimnaziala Nr.3 | Real | Franceza | Chimie
+1031 | Ivan Ivanov | CEITI | Real | Romana | Informatica
+
