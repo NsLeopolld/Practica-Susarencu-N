@@ -8,5 +8,11 @@ void addCandidat();
 void addGrades();
 void deleteCandidat();
 void deleteGrades();
+void modifyCandidat();
+void modifyGradesById();
+void createAverageFile();
+void showCandidatesByDiscipline();
+void showTopAverageCandidate();
+void countRestantieri();
 
 #endif
