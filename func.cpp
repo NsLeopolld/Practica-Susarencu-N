@@ -8,13 +8,13 @@
 #include <iomanip>
 #include <limits>
 
-static const int MAX_LINE = 512;
-static const int MAX_CANDIDATES = 512;
-static const int MAX_FIELD = 128;
-static const int MAX_NAME = 64;
-static const int MAX_DISC = 64;
+const int MAX_LINE = 512;
+const int MAX_CANDIDATES = 512;
+const int MAX_FIELD = 128;
+const int MAX_NAME = 64;
+const int MAX_DISC = 64;
 
-static void trim(char *out, const char *in, size_t outSize) {
+void trim(char *out, const char *in, size_t outSize) {
     const char *start = in;
     while (*start && std::isspace((unsigned char)*start)) {
         start++;
@@ -31,13 +31,13 @@ static void trim(char *out, const char *in, size_t outSize) {
     out[len] = '\0';
 }
 
-static void toLowerInPlace(char *text) {
+void toLowerInPlace(char *text) {
     for (size_t i = 0; text[i]; i++) {
         text[i] = static_cast<char>(std::tolower((unsigned char)text[i]));
     }
 }
 
-static bool parseCandidateLine(const char *line, int &id, char *fullName, char *scoala,
+bool parseCandidateLine(const char *line, int &id, char *fullName, char *scoala,
                                char *profil, char *limba, char *disciplina) {
     char buffer[MAX_LINE];
     std::strncpy(buffer, line, MAX_LINE - 1);
@@ -68,7 +68,7 @@ static bool parseCandidateLine(const char *line, int &id, char *fullName, char *
     return true;
 }
 
-static bool parseExamLine(const char *line, int &id, double &nota1, double &nota2, double &nota3) {
+bool parseExamLine(const char *line, int &id, double &nota1, double &nota2, double &nota3) {
     return std::sscanf(line, "%d %lf %lf %lf", &id, &nota1, &nota2, &nota3) == 4;
 }
 
