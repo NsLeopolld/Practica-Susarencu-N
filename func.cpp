@@ -142,7 +142,7 @@ void addCandidat() {
     cout << "Introduceti disciplina: ";
     cin.getline(disciplina, MAX_FIELD);
     ofstream fout("Candidat.txt", ios::app);
-    fout << newId << " | " << nume << " " << prenume << " | " << scoala << " | " << profil << " | " << limba << " | " << disciplina << "\n";
+    fout << newId << " | " << nume << " " << prenume << " | " << scoala << " | " << profil << " | " << limba << " | " << disciplina << endl;
     fout.close();
     cout << "Candidat adaugat cu ID: " << newId << "\n";
 }
@@ -430,7 +430,7 @@ void createAverageFile() {
         }
         if (foundIndex >= 0) {
             double average = (n1[foundIndex] + n2[foundIndex] + n3[foundIndex]) / 3.0;
-            fout << " | Media: " << average;
+            fout << " | Media: " << average << "";
         } else {
             fout << " | Media: N/A";
         }
@@ -539,7 +539,11 @@ void showTopAverageCandidate() {
         if (line[0] == '\0') continue;
         int id;
         if (sscanf(line, "%d", &id) == 1 && id == bestId) {
-            cout << line << " | Media: " << fixed << setprecision(2) << bestAverage << "\n";
+            cout << "Candidatul cu cea mai mare medie:\n";
+            cout << line << "\n";
+            cout << fixed << setprecision(2);
+            cout << "Media: " << bestAverage << "\n";
+            cout.unsetf(ios::fixed);
             found = true;
             break;
         }
