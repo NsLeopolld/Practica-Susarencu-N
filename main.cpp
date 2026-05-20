@@ -1,111 +1,62 @@
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
 #include <limits>
 #include "func.h"
 using namespace std;
 
-static const int MAX_LINE = 512;
-
 static void pause() {
-    cout << "\nPress RETURN to continue...";
-    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cout << "\nApasati ENTER pentru a continua...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cin.get();
 }
 
 int main() {
     bool running = true;
-    char lines[MAX_LINE];
     welcome();
     while (running) {
         int choice = menu();
         switch (choice) {
             case 0:
                 running = false;
+                cout << "La revedere!\n";
                 break;
+
             case 1: {
-                ifstream finC("Candidat.txt");
-                if (!finC) {
-                    cout << "Nu se poate deschide fisierul Candidat.txt\n";
+                ifstream fin("Candidat.txt");
+                if (!fin) {
+                    cout << "  [Eroare] Nu se poate deschide Candidat.txt\n";
                 } else {
-                    while (finC.getline(lines, MAX_LINE)) {
-                        cout << lines << "\n";
-                    }
-                    finC.close();
+                    printCandidatTable(fin);
+                    fin.close();
                 }
-                pause();
-                ClearScreen();
-                break;
+                pause(); ClearScreen(); break;
             }
+
             case 2: {
-                ifstream finN("Examen.txt");
-                if (!finN) {
-                    cout << "Nu se poate deschide fisierul Examen.txt\n";
+                ifstream fin("Examen.txt");
+                if (!fin) {
+                    cout << "  [Eroare] Nu se poate deschide Examen.txt\n";
                 } else {
-                    while (finN.getline(lines, MAX_LINE)) {
-                        cout << lines << "\n";
-                    }
-                    finN.close();
+                    printExamTable(fin);
+                    fin.close();
                 }
-                pause();
-                ClearScreen();
-                break;
+                pause(); ClearScreen(); break;
             }
-            case 3:
-                addCandidat();
-                pause();
-                ClearScreen();
-                break;
-            case 4:
-                addGrades();
-                pause();
-                ClearScreen();
-                break;
-            case 5:
-                deleteCandidat();
-                pause();
-                ClearScreen();
-                break;
-            case 6:
-                deleteGrades();
-                pause();
-                ClearScreen();
-                break;
-            case 7:
-                modifyCandidat();
-                pause();
-                ClearScreen();
-                break;
-            case 8:
-                modifyGradesById();
-                pause();
-                ClearScreen();
-                break;
-            case 9:
-                createAverageFile();
-                pause();
-                ClearScreen();
-                break;
-            case 10:
-                showCandidatesByDiscipline();
-                pause();
-                ClearScreen();
-                break;
-            case 11:
-                showTopAverageCandidate();
-                pause();
-                ClearScreen();
-                break;
-            case 12:
-                countRestantieri();
-                pause();
-                ClearScreen();
-                break;
+
+            case 3:  addCandidat();             pause(); ClearScreen(); break;
+            case 4:  addGrades();               pause(); ClearScreen(); break;
+            case 5:  deleteCandidat();          pause(); ClearScreen(); break;
+            case 6:  deleteGrades();            pause(); ClearScreen(); break;
+            case 7:  modifyCandidat();          pause(); ClearScreen(); break;
+            case 8:  modifyGradesById();        pause(); ClearScreen(); break;
+            case 9:  createAverageFile();       pause(); ClearScreen(); break;
+            case 10: showCandidatesByDiscipline(); pause(); ClearScreen(); break;
+            case 11: showTopAverageCandidate(); pause(); ClearScreen(); break;
+            case 12: countRestantieri();        pause(); ClearScreen(); break;
+
             default:
-                cout << "!!!Error!!! invalid option\n\n";
-                pause();
-                ClearScreen();
-                break;
+                cout << "  [Eroare] Optiune invalida. Alegeti un numar intre 0 si 12.\n";
+                pause(); ClearScreen(); break;
         }
     }
     return 0;

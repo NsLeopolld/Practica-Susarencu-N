@@ -1,9 +1,12 @@
 #ifndef FUNC_H
 #define FUNC_H
 
+#include <fstream>
 void ClearScreen();
 void welcome();
-int menu();
+int  menu();
+void printCandidatTable(std::ifstream &fin);
+void printExamTable(std::ifstream &fin);
 void addCandidat();
 void addGrades();
 void deleteCandidat();
