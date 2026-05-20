@@ -86,6 +86,23 @@ bool readPositiveInt(int &val, const char *prompt) {
     return false;
 }
 
+bool readNonEmptyLine(char *buf, size_t size, const char *prompt) {
+    while (true) {
+        cout << prompt;
+        if (!cin.getline(buf, size)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "  [Eroare] Input invalid. Incercati din nou.\n";
+            continue;
+        }
+        if (!isNonEmpty(buf)) {
+            cout << "  [Eroare] Campul nu poate fi gol. Incercati din nou.\n";
+            continue;
+        }
+        return true;
+    }
+}
+
 bool parseCandidateLine(const char *line, int &id, char *fullName, char *scoala,
                         char *profil, char *limba, char *disciplina) {
     char buffer[MAX_LINE];
@@ -106,8 +123,8 @@ bool parseCandidateLine(const char *line, int &id, char *fullName, char *scoala,
     return true;
 }
 
-bool parseExamLine(const char *line, int &id, double &nota1, double &nota2, double &nota3) {
-    return sscanf(line, "%d %lf %lf %lf", &id, &nota1, &nota2, &nota3) == 4;
+bool parseExamLine(const char *line, int &id, double &nota1, double &nota2, double &nota3, double &nota4) {
+    return sscanf(line, "%d %lf %lf %lf %lf", &id, &nota1, &nota2, &nota3, &nota4) == 5;
 }
 
 static string cell(const char *s, int width) {
@@ -166,6 +183,7 @@ static void printExamSeparator() {
          << "+" << setw(11) << "-"
          << "+" << setw(11) << "-"
          << "+" << setw(11) << "-"
+         << "+" << setw(11) << "-"
          << "+" << setfill(' ') << "\n";
 }
 
@@ -175,6 +193,7 @@ void printExamTable(ifstream &fin) {
          << " | " << setw(9) << "Nota 1"
          << " | " << setw(9) << "Nota 2"
          << " | " << setw(9) << "Nota 3"
+         << " | " << setw(9) << "Nota 4"
          << " |\n";
     printExamSeparator();
 
@@ -183,18 +202,19 @@ void printExamTable(ifstream &fin) {
     while (fin.getline(line, MAX_LINE)) {
         if (line[0] == '\0' || line[0] == '\r') continue;
         int id;
-        double n1, n2, n3;
-        if (parseExamLine(line, id, n1, n2, n3)) {
+        double n1, n2, n3, n4;
+        if (parseExamLine(line, id, n1, n2, n3, n4)) {
             cout << fixed << setprecision(2);
             cout << "| " << left  << setw(W_ID) << id
                  << " | " << right << setw(9)  << n1
                  << " | " << setw(9) << n2
                  << " | " << setw(9) << n3
+                 << " | " << setw(9) << n4
                  << " |\n";
             any = true;
         }
     }
-    if (!any) cout << "|" << setw(W_ID+35) << left << " (fisier gol)" << "|\n";
+    if (!any) cout << "|" << setw(W_ID+47) << left << " (fisier gol)" << "|\n";
     printExamSeparator();
     cout.unsetf(ios::fixed);
 }
@@ -215,9 +235,9 @@ bool gradeExists(int id) {
     ifstream f("Examen.txt");
     if (!f) return false;
     char line[MAX_LINE];
-    int cid; double n1, n2, n3;
+    int cid; double n1, n2, n3, n4;
     while (f.getline(line, MAX_LINE))
-        if (parseExamLine(line, cid, n1, n2, n3) && cid == id) return true;
+        if (parseExamLine(line, cid, n1, n2, n3, n4) && cid == id) return true;
     return false;
 }
 
@@ -314,9 +334,14 @@ void addCandidat() {
 
     ofstream fout("Candidat.txt", ios::app);
     if (!fout) { cout << "  [Eroare] Nu se poate scrie in Candidat.txt\n"; return; }
-    fout << newId << " | " << nume << " " << prenume
-         << " | " << scoala << " | " << profil
-         << " | " << limba  << " | " << disciplina << "\n";
+    ostringstream oss;
+    oss << newId
+        << " | " << left << setw(23) << (string(nume) + " " + prenume)
+        << " | " << setw(23) << scoala
+        << " | " << setw(4) << profil
+        << " | " << setw(8) << limba
+        << " | " << disciplina;
+    fout << oss.str() << "\n";
     fout.close();
     cout << "  Candidat adaugat cu ID: " << newId << "\n";
 }
@@ -335,15 +360,16 @@ void addGrades() {
         return;
     }
 
-    double nota1, nota2, nota3;
+    double nota1, nota2, nota3, nota4;
     if (!readDouble(nota1, 1.0, 10.0, "Introduceti nota 1 (1-10): ")) return;
     if (!readDouble(nota2, 1.0, 10.0, "Introduceti nota 2 (1-10): ")) return;
     if (!readDouble(nota3, 1.0, 10.0, "Introduceti nota 3 (1-10): ")) return;
+    if (!readDouble(nota4, 1.0, 10.0, "Introduceti nota 4 (1-10): ")) return;
 
     ofstream fout("Examen.txt", ios::app);
     if (!fout) { cout << "  [Eroare] Nu se poate scrie in Examen.txt\n"; return; }
-    fout << "\n" << fixed << setprecision(1)
-         << id << " " << nota1 << " " << nota2 << " " << nota3 << "\n";
+    fout << fixed << setprecision(1)
+         << id << " " << nota1 << " " << nota2 << " " << nota3 << " " << nota4 << endl;
     fout.close();
     cout << "  Note adaugate pentru ID: " << id << "\n";
 }
@@ -390,8 +416,8 @@ void deleteCandidat() {
     if (finE && foutE) {
         while (finE.getline(line, MAX_LINE)) {
             if (line[0] == '\0' || line[0] == '\r') continue;
-            int cid; double g1, g2, g3;
-            if (!parseExamLine(line, cid, g1, g2, g3) || cid != idToDelete)
+            int cid; double g1, g2, g3, g4;
+            if (!parseExamLine(line, cid, g1, g2, g3, g4) || cid != idToDelete)
                 foutE << line << "\n";
         }
         finE.close(); foutE.close();
@@ -415,8 +441,8 @@ void deleteGrades() {
     bool found = false;
     while (fin.getline(line, MAX_LINE)) {
         if (line[0] == '\0' || line[0] == '\r') continue;
-        int cid; double n1, n2, n3;
-        if (parseExamLine(line, cid, n1, n2, n3) && cid == id) { found = true; continue; }
+        int cid; double n1, n2, n3, n4;
+        if (parseExamLine(line, cid, n1, n2, n3, n4) && cid == id) { found = true; continue; }
         fout << line << "\n";
     }
     fin.close(); fout.close();
@@ -443,6 +469,8 @@ void modifyCandidat() {
     char lines[MAX_CANDIDATES][MAX_LINE];
     int count = 0; bool found = false;
     char line[MAX_LINE];
+    int foundId = -1;
+    char oldName[MAX_NAME], oldScoala[MAX_FIELD], oldProfil[MAX_FIELD], oldLimba[MAX_FIELD], oldDisc[MAX_FIELD];
 
     while (fin.getline(line, MAX_LINE) && count < MAX_CANDIDATES) {
         if (line[0] == '\0' || line[0] == '\r') continue;
@@ -450,9 +478,58 @@ void modifyCandidat() {
         if (!found && parseCandidateLine(line, id, cName, scoala, profil, limba, disc) &&
             strcmp(cName, fullName) == 0) {
             found = true;
-            char nNume[MAX_NAME], nPrenume[MAX_NAME], nScoala[MAX_FIELD],
-                 nProfil[MAX_FIELD], nLimba[MAX_FIELD], nDisc[MAX_FIELD];
+            foundId = id;
+            strcpy(oldName, cName);
+            strcpy(oldScoala, scoala);
+            strcpy(oldProfil, profil);
+            strcpy(oldLimba, limba);
+            strcpy(oldDisc, disc);
+        }
+        strncpy(lines[count], line, MAX_LINE - 1);
+        lines[count][MAX_LINE - 1] = '\0';
+        count++;
+    }
+    fin.close();
 
+    if (!found) { cout << "  [Eroare] Candidat '" << fullName << "' nu a fost gasit.\n"; return; }
+
+    cout << "\n  Campuri actuale:\n";
+    cout << "    Nume Prenume: " << oldName << "\n";
+    cout << "    Scoala: " << oldScoala << "\n";
+    cout << "    Profil: " << oldProfil << "\n";
+    cout << "    Limba: " << oldLimba << "\n";
+    cout << "    Disciplina: " << oldDisc << "\n\n";
+    cout << "Alegeti campul de modificat:\n";
+    cout << " 1. Nume si prenume\n";
+    cout << " 2. Scoala\n";
+    cout << " 3. Profil\n";
+    cout << " 4. Limba\n";
+    cout << " 5. Disciplina\n";
+    cout << " 6. Toate campurile\n";
+    cout << " 0. Renunta\n";
+    cout << "Selectati optiunea: ";
+
+    int option;
+    if (!(cin >> option)) {
+        recoverCin();
+        cout << "  [Eroare] Optiune invalida.\n";
+        return;
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    char newName[MAX_NAME], newScoala[MAX_FIELD], newProfil[MAX_FIELD], newLimba[MAX_FIELD], newDisc[MAX_FIELD];
+    strcpy(newName, oldName);
+    strcpy(newScoala, oldScoala);
+    strcpy(newProfil, oldProfil);
+    strcpy(newLimba, oldLimba);
+    strcpy(newDisc, oldDisc);
+
+    switch (option) {
+        case 0:
+            cout << "  Operatie anulata.\n";
+            return;
+        case 1: {
+            char nNume[MAX_NAME], nPrenume[MAX_NAME];
             cout << "Introduceti noul nume: ";
             if (!(cin >> nNume) || !isNonEmpty(nNume)) {
                 recoverCin(); cout << "  [Eroare] Nume invalid.\n"; return;
@@ -461,39 +538,81 @@ void modifyCandidat() {
             if (!(cin >> nPrenume) || !isNonEmpty(nPrenume)) {
                 recoverCin(); cout << "  [Eroare] Prenume invalid.\n"; return;
             }
+            snprintf(newName, sizeof(newName), "%s %s", nNume, nPrenume);
+            break;
+        }
+        case 2:
+            if (!readNonEmptyLine(newScoala, MAX_FIELD, "Introduceti noua scoala: ")) return;
+            break;
+        case 3: {
+            if (!readNonEmptyLine(newProfil, MAX_FIELD, "Introduceti noul profil (Real/Uman): ")) return;
+            char tmp[MAX_FIELD]; trim(tmp, newProfil, MAX_FIELD); toLowerInPlace(tmp);
+            if (strcmp(tmp, "real") != 0 && strcmp(tmp, "uman") != 0) {
+                cout << "  [Eroare] Profilul trebuie sa fie 'Real' sau 'Uman'.\n";
+                return;
+            }
+            break;
+        }
+        case 4:
+            if (!readNonEmptyLine(newLimba, MAX_FIELD, "Introduceti noua limba: ")) return;
+            break;
+        case 5:
+            if (!readNonEmptyLine(newDisc, MAX_FIELD, "Introduceti noua disciplina: ")) return;
+            break;
+        case 6: {
+            char nNume[MAX_NAME], nPrenume[MAX_NAME];
+            cout << "Introduceti noul nume: ";
+            if (!(cin >> nNume) || !isNonEmpty(nNume)) {
+                recoverCin(); cout << "  [Eroare] Nume invalid.\n"; return;
+            }
+            cout << "Introduceti noul prenume: ";
+            if (!(cin >> nPrenume) || !isNonEmpty(nPrenume)) {
+                recoverCin(); cout << "  [Eroare] Prenume invalid.\n"; return;
+            }
+            snprintf(newName, sizeof(newName), "%s %s", nNume, nPrenume);
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Introduceti noua scoala: ";
-            cin.getline(nScoala, MAX_FIELD);
-            if (!isNonEmpty(nScoala)) { cout << "  [Eroare] Scoala nu poate fi goala.\n"; return; }
-            cout << "Introduceti noul profil (Real/Uman): ";
-            cin.getline(nProfil, MAX_FIELD);
+            if (!readNonEmptyLine(newScoala, MAX_FIELD, "Introduceti noua scoala: ")) return;
+            if (!readNonEmptyLine(newProfil, MAX_FIELD, "Introduceti noul profil (Real/Uman): ")) return;
             {
-                char tmp[MAX_FIELD]; trim(tmp, nProfil, MAX_FIELD); toLowerInPlace(tmp);
-                if (strcmp(tmp,"real")!=0 && strcmp(tmp,"uman")!=0) {
-                    cout << "  [Eroare] Profilul trebuie sa fie 'Real' sau 'Uman'.\n"; return;
+                char tmp[MAX_FIELD]; trim(tmp, newProfil, MAX_FIELD); toLowerInPlace(tmp);
+                if (strcmp(tmp, "real") != 0 && strcmp(tmp, "uman") != 0) {
+                    cout << "  [Eroare] Profilul trebuie sa fie 'Real' sau 'Uman'.\n";
+                    return;
                 }
             }
-            cout << "Introduceti noua limba: ";
-            cin.getline(nLimba, MAX_FIELD);
-            if (!isNonEmpty(nLimba)) { cout << "  [Eroare] Limba nu poate fi goala.\n"; return; }
-            cout << "Introduceti noua disciplina: ";
-            cin.getline(nDisc, MAX_FIELD);
-            if (!isNonEmpty(nDisc)) { cout << "  [Eroare] Disciplina nu poate fi goala.\n"; return; }
+            if (!readNonEmptyLine(newLimba, MAX_FIELD, "Introduceti noua limba: ")) return;
+            if (!readNonEmptyLine(newDisc, MAX_FIELD, "Introduceti noua disciplina: ")) return;
+            break;
+        }
+        default:
+            cout << "  [Eroare] Optiune invalida.\n";
+            return;
+    }
 
-            char buf[MAX_LINE * 2];
-            snprintf(buf, sizeof(buf), "%d | %s %s | %s | %s | %s | %s",
-                     id, nNume, nPrenume, nScoala, nProfil, nLimba, nDisc);
-            strncpy(lines[count], buf, MAX_LINE - 1);
-            lines[count][MAX_LINE - 1] = '\0';
-            count++;
-        } else {
-            strncpy(lines[count], line, MAX_LINE - 1);
-            lines[count++][MAX_LINE - 1] = '\0';
+    ostringstream oss;
+    oss << foundId
+        << " | " << left << setw(23) << newName
+        << " | " << setw(23) << newScoala
+        << " | " << setw(4) << newProfil
+        << " | " << setw(8) << newLimba
+        << " | " << newDisc;
+    string buf = oss.str();
+
+    bool replaced = false;
+    for (int i = 0; i < count; i++) {
+        int id; char cName[MAX_NAME], scoala[MAX_FIELD], profil[MAX_FIELD], limba[MAX_FIELD], disc[MAX_FIELD];
+        if (!replaced && parseCandidateLine(lines[i], id, cName, scoala, profil, limba, disc) &&
+            id == foundId && strcmp(cName, fullName) == 0) {
+            strncpy(lines[i], buf.c_str(), MAX_LINE - 1);
+            lines[i][MAX_LINE - 1] = '\0';
+            replaced = true;
         }
     }
-    fin.close();
 
-    if (!found) { cout << "  [Eroare] Candidat '" << fullName << "' nu a fost gasit.\n"; return; }
+    if (!replaced) {
+        cout << "  [Eroare] Nu s-a putut actualiza inregistrarea.\n";
+        return;
+    }
 
     ofstream fout("Candidat.txt");
     if (!fout) { cout << "  [Eroare] Nu se poate scrie in Candidat.txt\n"; return; }
@@ -517,26 +636,82 @@ void modifyGradesById() {
     if (!fin) { cout << "  [Eroare] Nu se poate deschide Examen.txt\n"; return; }
 
     char lines[MAX_CANDIDATES][MAX_LINE];
-    int  count = 0; bool found = false;
+    int  count = 0;
+    int  foundIndex = -1;
     char line[MAX_LINE];
+    double currentN1 = 0.0, currentN2 = 0.0, currentN3 = 0.0, currentN4 = 0.0;
 
     while (fin.getline(line, MAX_LINE) && count < MAX_CANDIDATES) {
         if (line[0] == '\0' || line[0] == '\r') continue;
-        int cid; double n1, n2, n3;
-        if (!found && parseExamLine(line, cid, n1, n2, n3) && cid == id) {
-            found = true;
-            double nn1, nn2, nn3;
+        int cid; double n1, n2, n3, n4;
+        if (parseExamLine(line, cid, n1, n2, n3, n4)) {
+            if (cid == id && foundIndex == -1) {
+                foundIndex = count;
+                currentN1 = n1;
+                currentN2 = n2;
+                currentN3 = n3;
+                currentN4 = n4;
+            }
+        }
+        strncpy(lines[count], line, MAX_LINE - 1);
+        lines[count][MAX_LINE - 1] = '\0';
+        count++;
+    }
+    fin.close();
+
+    if (foundIndex == -1) {
+        cout << "  [Eroare] Nu s-au gasit note pentru ID " << id << ".\n";
+        return;
+    }
+
+    cout << "\n  Note curente pentru ID " << id << ": " << fixed << setprecision(2)
+         << currentN1 << ", " << currentN2 << ", " << currentN3 << ", " << currentN4 << "\n";
+    cout.unsetf(ios::fixed);
+    cout << "Alegeti ce nota doriti sa modificati:\n";
+    cout << " 1. Nota 1\n";
+    cout << " 2. Nota 2\n";
+    cout << " 3. Nota 3\n";
+    cout << " 4. Nota 4\n";
+    cout << " 5. Toate notele\n";
+    cout << " 0. Renunta\n";
+    cout << "Selectati optiunea: ";
+
+    int option;
+    if (!(cin >> option)) {
+        recoverCin();
+        cout << "  [Eroare] Optiune invalida.\n";
+        return;
+    }
+
+    double nn1 = currentN1, nn2 = currentN2, nn3 = currentN3, nn4 = currentN4;
+    switch (option) {
+        case 0:
+            cout << "  Operatie anulata.\n";
+            return;
+        case 1:
+            if (!readDouble(nn1, 1.0, 10.0, "Introduceti noua nota 1 (1-10): ")) return;
+            break;
+        case 2:
+            if (!readDouble(nn2, 1.0, 10.0, "Introduceti noua nota 2 (1-10): ")) return;
+            break;
+        case 3:
+            if (!readDouble(nn3, 1.0, 10.0, "Introduceti noua nota 3 (1-10): ")) return;
+            break;
+        case 4:
+            if (!readDouble(nn4, 1.0, 10.0, "Introduceti noua nota 4 (1-10): ")) return;
+            break;
+        case 5:
             if (!readDouble(nn1, 1.0, 10.0, "Introduceti noua nota 1 (1-10): ")) return;
             if (!readDouble(nn2, 1.0, 10.0, "Introduceti noua nota 2 (1-10): ")) return;
             if (!readDouble(nn3, 1.0, 10.0, "Introduceti noua nota 3 (1-10): ")) return;
-            snprintf(lines[count], MAX_LINE, "%d %.2f %.2f %.2f", id, nn1, nn2, nn3);
-            count++;
-        } else {
-            strncpy(lines[count], line, MAX_LINE - 1);
-            lines[count++][MAX_LINE - 1] = '\0';
-        }
+            if (!readDouble(nn4, 1.0, 10.0, "Introduceti noua nota 4 (1-10): ")) return;
+            break;
+        default:
+            cout << "  [Eroare] Optiune invalida.\n";
+            return;
     }
-    fin.close();
+
+    snprintf(lines[foundIndex], MAX_LINE, "%d %.2f %.2f %.2f %.2f", id, nn1, nn2, nn3, nn4);
 
     ofstream fout("Examen.txt");
     if (!fout) { cout << "  [Eroare] Nu se poate scrie in Examen.txt\n"; return; }
@@ -567,11 +742,11 @@ void createAverageFile() {
     finC.close();
 
     int    examIds[MAX_CANDIDATES];
-    double n1[MAX_CANDIDATES], n2[MAX_CANDIDATES], n3[MAX_CANDIDATES];
+    double n1[MAX_CANDIDATES], n2[MAX_CANDIDATES], n3[MAX_CANDIDATES], n4[MAX_CANDIDATES];
     int    countE = 0;
     while (finE.getline(line, MAX_LINE) && countE < MAX_CANDIDATES) {
         if (line[0] == '\0' || line[0] == '\r') continue;
-        if (parseExamLine(line, examIds[countE], n1[countE], n2[countE], n3[countE]))
+        if (parseExamLine(line, examIds[countE], n1[countE], n2[countE], n3[countE], n4[countE]))
             countE++;
     }
     finE.close();
@@ -585,7 +760,7 @@ void createAverageFile() {
         int fi = -1;
         for (int j = 0; j < countE; j++) if (examIds[j] == id) { fi = j; break; }
         if (fi >= 0)
-            fout << " | Media: " << (n1[fi] + n2[fi] + n3[fi]) / 3.0;
+            fout << " | Media: " << (n1[fi] + n2[fi] + n3[fi] + n4[fi]) / 4.0;
         else
             fout << " | Media: N/A";
         fout << "\n";
@@ -662,9 +837,9 @@ void showTopAverageCandidate() {
     char   line[MAX_LINE];
     while (finE.getline(line, MAX_LINE)) {
         if (line[0] == '\0' || line[0] == '\r') continue;
-        int id; double n1, n2, n3;
-        if (parseExamLine(line, id, n1, n2, n3)) {
-            double avg = (n1 + n2 + n3) / 3.0;
+        int id; double n1, n2, n3, n4;
+        if (parseExamLine(line, id, n1, n2, n3, n4)) {
+            double avg = (n1 + n2 + n3 + n4) / 4.0;
             if (avg > bestAvg) { bestAvg = avg; bestId = id; }
         }
     }
@@ -705,9 +880,9 @@ void countRestantieri() {
     int  count = 0;
     while (fin.getline(line, MAX_LINE)) {
         if (line[0] == '\0' || line[0] == '\r') continue;
-        int id; double n1, n2, n3;
-        if (parseExamLine(line, id, n1, n2, n3))
-            if (n1 < 5.0 || n2 < 5.0 || n3 < 5.0) count++;
+        int id; double n1, n2, n3, n4;
+        if (parseExamLine(line, id, n1, n2, n3, n4))
+            if (n1 < 5.0 || n2 < 5.0 || n3 < 5.0 || n4 < 5.0) count++;
     }
     fin.close();
     cout << "  Numarul de restantieri (cel putin o nota < 5): " << count << "\n";

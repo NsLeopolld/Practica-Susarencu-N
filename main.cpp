@@ -11,6 +11,7 @@ static void pause() {
 }
 
 int main() {
+    ClearScreen();
     bool running = true;
     welcome();
     while (running) {
