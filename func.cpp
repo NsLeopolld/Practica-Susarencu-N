@@ -44,6 +44,59 @@ bool isNonEmpty(const char *s) {
     return false;
 }
 
+bool isValidName(const char *s) {
+    bool hasLetter = false;
+    for (size_t i = 0; s[i]; i++) {
+        unsigned char c = (unsigned char)s[i];
+        if (isalpha(c) || c == ' ' || c == '-' || c == '\'') {
+            if (isalpha(c)) hasLetter = true;
+        } else {
+            return false;
+        }
+    }
+    return hasLetter;
+}
+
+bool isValidAlphaField(const char *s) {
+    bool hasLetter = false;
+    for (size_t i = 0; s[i]; i++) {
+        unsigned char c = (unsigned char)s[i];
+        if (isalpha(c) || c == ' ') {
+            if (isalpha(c)) hasLetter = true;
+        } else {
+            return false;
+        }
+    }
+    return hasLetter;
+}
+
+bool isValidScoala(const char *s) {
+    bool hasLetter = false;
+    for (size_t i = 0; s[i]; i++) {
+        unsigned char c = (unsigned char)s[i];
+        if (isalnum(c) || c == ' ' || c == '.' || c == '-') {
+            if (isalpha(c)) hasLetter = true;
+        } else {
+            return false;
+        }
+    }
+    return hasLetter;
+}
+void capitalizeWords(char *s) {
+    bool newWord = true;
+    for (size_t i = 0; s[i]; i++) {
+        unsigned char c = (unsigned char)s[i];
+        if (isspace(c) || c == '-' || c == '\'') {
+            newWord = true;
+        } else if (isalpha(c)) {
+            s[i] = static_cast<char>(newWord ? toupper(c) : tolower(c));
+            newWord = false;
+        } else {
+            newWord = false;
+        }
+    }
+}
+
 void recoverCin() {
     cin.clear();
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -304,16 +357,31 @@ void addCandidat() {
         recoverCin();
         cout << "  [Eroare] Numele nu poate fi gol.\n"; return;
     }
+    if (!isValidName(nume)) {
+        recoverCin();
+        cout << "  [Eroare] Numele nu poate contine cifre sau caractere speciale.\n"; return;
+    }
+    capitalizeWords(nume);
+
     cout << "Introduceti prenumele: ";
     if (!(cin >> prenume) || !isNonEmpty(prenume)) {
         recoverCin();
         cout << "  [Eroare] Prenumele nu poate fi gol.\n"; return;
     }
+    if (!isValidName(prenume)) {
+        recoverCin();
+        cout << "  [Eroare] Prenumele nu poate contine cifre sau caractere speciale.\n"; return;
+    }
+    capitalizeWords(prenume);
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     cout << "Introduceti scoala: ";
     cin.getline(scoala, MAX_FIELD);
     if (!isNonEmpty(scoala)) { cout << "  [Eroare] Scoala nu poate fi goala.\n"; return; }
+    if (!isValidScoala(scoala)) {
+        cout << "  [Eroare] Numele scolii contine caractere invalide.\n"; return;
+    }
+    capitalizeWords(scoala);
 
     cout << "Introduceti profilul (Real/Uman): ";
     cin.getline(profil, MAX_FIELD);
@@ -322,15 +390,24 @@ void addCandidat() {
         if (strcmp(tmp, "real") != 0 && strcmp(tmp, "uman") != 0) {
             cout << "  [Eroare] Profilul trebuie sa fie 'Real' sau 'Uman'.\n"; return;
         }
+        strncpy(profil, (strcmp(tmp, "real") == 0) ? "Real" : "Uman", MAX_FIELD);
     }
 
     cout << "Introduceti limba: ";
     cin.getline(limba, MAX_FIELD);
     if (!isNonEmpty(limba)) { cout << "  [Eroare] Limba nu poate fi goala.\n"; return; }
+    if (!isValidAlphaField(limba)) {
+        cout << "  [Eroare] Limba nu poate contine cifre sau caractere speciale.\n"; return;
+    }
+    capitalizeWords(limba);
 
     cout << "Introduceti disciplina: ";
     cin.getline(disciplina, MAX_FIELD);
     if (!isNonEmpty(disciplina)) { cout << "  [Eroare] Disciplina nu poate fi goala.\n"; return; }
+    if (!isValidAlphaField(disciplina)) {
+        cout << "  [Eroare] Disciplina nu poate contine cifre sau caractere speciale.\n"; return;
+    }
+    capitalizeWords(disciplina);
 
     ofstream fout("Candidat.txt", ios::app);
     if (!fout) { cout << "  [Eroare] Nu se poate scrie in Candidat.txt\n"; return; }
@@ -378,8 +455,18 @@ void deleteCandidat() {
     char nume[MAX_NAME], prenume[MAX_NAME];
     cout << "Introduceti numele: ";
     if (!(cin >> nume)) { recoverCin(); cout << "  [Eroare] Input invalid.\n"; return; }
+    if (!isValidName(nume)) {
+        recoverCin();
+        cout << "  [Eroare] Numele nu poate contine cifre sau caractere speciale.\n"; return;
+    }
+    capitalizeWords(nume);
     cout << "Introduceti prenumele: ";
     if (!(cin >> prenume)) { recoverCin(); cout << "  [Eroare] Input invalid.\n"; return; }
+    if (!isValidName(prenume)) {
+        recoverCin();
+        cout << "  [Eroare] Prenumele nu poate contine cifre sau caractere speciale.\n"; return;
+    }
+    capitalizeWords(prenume);
 
     char fullName[MAX_NAME * 2];
     snprintf(fullName, sizeof(fullName), "%s %s", nume, prenume);
@@ -388,27 +475,77 @@ void deleteCandidat() {
     if (!finC) { cout << "  [Eroare] Nu se poate deschide Candidat.txt\n"; return; }
 
     char lines[MAX_CANDIDATES][MAX_LINE];
-    int  count = 0, idToDelete = -1;
+    int  count = 0;
     char line[MAX_LINE];
+
+    int  matchIds[MAX_CANDIDATES];
+    int  matchCount = 0;
 
     while (finC.getline(line, MAX_LINE) && count < MAX_CANDIDATES) {
         if (line[0] == '\0' || line[0] == '\r') continue;
         int id; char cName[MAX_NAME], scoala[MAX_FIELD], profil[MAX_FIELD], limba[MAX_FIELD], disc[MAX_FIELD];
         if (parseCandidateLine(line, id, cName, scoala, profil, limba, disc) &&
-            idToDelete == -1 && strcmp(cName, fullName) == 0) {
-            idToDelete = id;
-            continue;
+            strcmp(cName, fullName) == 0) {
+            if (matchCount < MAX_CANDIDATES)
+                matchIds[matchCount++] = id;
         }
         strncpy(lines[count], line, MAX_LINE - 1);
         lines[count++][MAX_LINE - 1] = '\0';
     }
     finC.close();
 
-    if (idToDelete == -1) { cout << "  [Eroare] Candidat '" << fullName << "' nu a fost gasit.\n"; return; }
+    if (matchCount == 0) {
+        cout << "  [Eroare] Candidat '" << fullName << "' nu a fost gasit.\n";
+        return;
+    }
 
+    int idToDelete = -1;
+    if (matchCount == 1) {
+        idToDelete = matchIds[0];
+    } else {
+        cout << "\n  Atentie: Exista " << matchCount
+             << " candidati cu numele '" << fullName << "':\n";
+        for (int m = 0; m < matchCount; m++) {
+            for (int i = 0; i < count; i++) {
+                int id; char cName[MAX_NAME], sc[MAX_FIELD], pr[MAX_FIELD], lb[MAX_FIELD], di[MAX_FIELD];
+                if (parseCandidateLine(lines[i], id, cName, sc, pr, lb, di) &&
+                    id == matchIds[m] && strcmp(cName, fullName) == 0) {
+                    cout << "    ID " << id << " | " << sc << " | " << pr
+                         << " | " << lb << " | " << di << "\n";
+                    break;
+                }
+            }
+        }
+        cout << "Introduceti ID-ul candidatului de sters: ";
+        int pickedId;
+        if (!(cin >> pickedId)) {
+            recoverCin();
+            cout << "  [Eroare] ID invalid.\n";
+            return;
+        }
+        bool valid = false;
+        for (int m = 0; m < matchCount; m++) {
+            if (matchIds[m] == pickedId) { valid = true; break; }
+        }
+        if (!valid) {
+            cout << "  [Eroare] ID-ul introdus nu apartine candidatilor gasiti.\n";
+            return;
+        }
+        idToDelete = pickedId;
+    }
+
+    bool skipped = false;
     ofstream foutC("Candidat.txt");
     if (!foutC) { cout << "  [Eroare] Nu se poate scrie in Candidat.txt\n"; return; }
-    for (int i = 0; i < count; i++) foutC << lines[i] << "\n";
+    for (int i = 0; i < count; i++) {
+        int id; char cName[MAX_NAME], sc[MAX_FIELD], pr[MAX_FIELD], lb[MAX_FIELD], di[MAX_FIELD];
+        if (!skipped && parseCandidateLine(lines[i], id, cName, sc, pr, lb, di) &&
+            id == idToDelete && strcmp(cName, fullName) == 0) {
+            skipped = true;
+            continue;
+        }
+        foutC << lines[i] << "\n";
+    }
     foutC.close();
 
     ifstream finE("Examen.txt");
@@ -457,8 +594,18 @@ void modifyCandidat() {
     char nume[MAX_NAME], prenume[MAX_NAME];
     cout << "Introduceti numele candidatului de modificat: ";
     if (!(cin >> nume)) { recoverCin(); cout << "  [Eroare] Input invalid.\n"; return; }
+    if (!isValidName(nume)) {
+        recoverCin();
+        cout << "  [Eroare] Numele nu poate contine cifre sau caractere speciale.\n"; return;
+    }
+    capitalizeWords(nume);
     cout << "Introduceti prenumele candidatului de modificat: ";
     if (!(cin >> prenume)) { recoverCin(); cout << "  [Eroare] Input invalid.\n"; return; }
+    if (!isValidName(prenume)) {
+        recoverCin();
+        cout << "  [Eroare] Prenumele nu poate contine cifre sau caractere speciale.\n"; return;
+    }
+    capitalizeWords(prenume);
 
     char fullName[MAX_NAME * 2];
     snprintf(fullName, sizeof(fullName), "%s %s", nume, prenume);
@@ -467,23 +614,18 @@ void modifyCandidat() {
     if (!fin) { cout << "  [Eroare] Nu se poate deschide Candidat.txt\n"; return; }
 
     char lines[MAX_CANDIDATES][MAX_LINE];
-    int count = 0; bool found = false;
+    int  count = 0;
     char line[MAX_LINE];
-    int foundId = -1;
-    char oldName[MAX_NAME], oldScoala[MAX_FIELD], oldProfil[MAX_FIELD], oldLimba[MAX_FIELD], oldDisc[MAX_FIELD];
+    int  matchIds[MAX_CANDIDATES];
+    int  matchCount = 0;
 
     while (fin.getline(line, MAX_LINE) && count < MAX_CANDIDATES) {
         if (line[0] == '\0' || line[0] == '\r') continue;
         int id; char cName[MAX_NAME], scoala[MAX_FIELD], profil[MAX_FIELD], limba[MAX_FIELD], disc[MAX_FIELD];
-        if (!found && parseCandidateLine(line, id, cName, scoala, profil, limba, disc) &&
+        if (parseCandidateLine(line, id, cName, scoala, profil, limba, disc) &&
             strcmp(cName, fullName) == 0) {
-            found = true;
-            foundId = id;
-            strcpy(oldName, cName);
-            strcpy(oldScoala, scoala);
-            strcpy(oldProfil, profil);
-            strcpy(oldLimba, limba);
-            strcpy(oldDisc, disc);
+            if (matchCount < MAX_CANDIDATES)
+                matchIds[matchCount++] = id;
         }
         strncpy(lines[count], line, MAX_LINE - 1);
         lines[count][MAX_LINE - 1] = '\0';
@@ -491,9 +633,69 @@ void modifyCandidat() {
     }
     fin.close();
 
-    if (!found) { cout << "  [Eroare] Candidat '" << fullName << "' nu a fost gasit.\n"; return; }
+    if (matchCount == 0) {
+        cout << "  [Eroare] Candidat '" << fullName << "' nu a fost gasit.\n";
+        return;
+    }
 
-    cout << "\n  Campuri actuale:\n";
+    int foundId = -1;
+    if (matchCount == 1) {
+        foundId = matchIds[0];
+    } else {
+        cout << "\n  Atentie: Exista " << matchCount
+             << " candidati cu numele '" << fullName << "':\n";
+        for (int m = 0; m < matchCount; m++) {
+            for (int i = 0; i < count; i++) {
+                int id; char cName[MAX_NAME], sc[MAX_FIELD], pr[MAX_FIELD], lb[MAX_FIELD], di[MAX_FIELD];
+                if (parseCandidateLine(lines[i], id, cName, sc, pr, lb, di) &&
+                    id == matchIds[m] && strcmp(cName, fullName) == 0) {
+                    cout << "    ID " << id << " | " << sc << " | " << pr
+                         << " | " << lb << " | " << di << "\n";
+                    break;
+                }
+            }
+        }
+        cout << "Introduceti ID-ul candidatului dorit: ";
+        int pickedId;
+        if (!(cin >> pickedId)) {
+            recoverCin();
+            cout << "  [Eroare] ID invalid.\n";
+            return;
+        }
+        bool valid = false;
+        for (int m = 0; m < matchCount; m++) {
+            if (matchIds[m] == pickedId) { valid = true; break; }
+        }
+        if (!valid) {
+            cout << "  [Eroare] ID-ul introdus nu apartine candidatilor gasiti.\n";
+            return;
+        }
+        foundId = pickedId;
+    }
+
+    char oldName[MAX_NAME], oldScoala[MAX_FIELD], oldProfil[MAX_FIELD],
+         oldLimba[MAX_FIELD], oldDisc[MAX_FIELD];
+    bool fieldsFilled = false;
+    for (int i = 0; i < count; i++) {
+        int id; char cName[MAX_NAME], sc[MAX_FIELD], pr[MAX_FIELD], lb[MAX_FIELD], di[MAX_FIELD];
+        if (parseCandidateLine(lines[i], id, cName, sc, pr, lb, di) &&
+            id == foundId && strcmp(cName, fullName) == 0) {
+            strcpy(oldName,   cName);
+            strcpy(oldScoala, sc);
+            strcpy(oldProfil, pr);
+            strcpy(oldLimba,  lb);
+            strcpy(oldDisc,   di);
+            fieldsFilled = true;
+            break;
+        }
+    }
+    if (!fieldsFilled) {
+        cout << "  [Eroare] Nu s-au putut citi campurile candidatului.\n";
+        return;
+    }
+
+    cout << "\n  Campuri actuale (ID " << foundId << "):\n";
+    cout << "    ID: " << foundId << "\n";
     cout << "    Nume Prenume: " << oldName << "\n";
     cout << "    Scoala: " << oldScoala << "\n";
     cout << "    Profil: " << oldProfil << "\n";
@@ -506,6 +708,7 @@ void modifyCandidat() {
     cout << " 4. Limba\n";
     cout << " 5. Disciplina\n";
     cout << " 6. Toate campurile\n";
+    cout << " 7. ID\n";
     cout << " 0. Renunta\n";
     cout << "Selectati optiunea: ";
 
@@ -517,12 +720,14 @@ void modifyCandidat() {
     }
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    char newName[MAX_NAME], newScoala[MAX_FIELD], newProfil[MAX_FIELD], newLimba[MAX_FIELD], newDisc[MAX_FIELD];
-    strcpy(newName, oldName);
+    char newName[MAX_NAME], newScoala[MAX_FIELD], newProfil[MAX_FIELD],
+         newLimba[MAX_FIELD], newDisc[MAX_FIELD];
+    strcpy(newName,   oldName);
     strcpy(newScoala, oldScoala);
     strcpy(newProfil, oldProfil);
-    strcpy(newLimba, oldLimba);
-    strcpy(newDisc, oldDisc);
+    strcpy(newLimba,  oldLimba);
+    strcpy(newDisc,   oldDisc);
+    int newId = foundId;
 
     switch (option) {
         case 0:
@@ -534,15 +739,27 @@ void modifyCandidat() {
             if (!(cin >> nNume) || !isNonEmpty(nNume)) {
                 recoverCin(); cout << "  [Eroare] Nume invalid.\n"; return;
             }
+            if (!isValidName(nNume)) {
+                recoverCin(); cout << "  [Eroare] Numele nu poate contine cifre sau caractere speciale.\n"; return;
+            }
+            capitalizeWords(nNume);
             cout << "Introduceti noul prenume: ";
             if (!(cin >> nPrenume) || !isNonEmpty(nPrenume)) {
                 recoverCin(); cout << "  [Eroare] Prenume invalid.\n"; return;
             }
+            if (!isValidName(nPrenume)) {
+                recoverCin(); cout << "  [Eroare] Prenumele nu poate contine cifre sau caractere speciale.\n"; return;
+            }
+            capitalizeWords(nPrenume);
             snprintf(newName, sizeof(newName), "%s %s", nNume, nPrenume);
             break;
         }
         case 2:
             if (!readNonEmptyLine(newScoala, MAX_FIELD, "Introduceti noua scoala: ")) return;
+            if (!isValidScoala(newScoala)) {
+                cout << "  [Eroare] Numele scolii contine caractere invalide.\n"; return;
+            }
+            capitalizeWords(newScoala);
             break;
         case 3: {
             if (!readNonEmptyLine(newProfil, MAX_FIELD, "Introduceti noul profil (Real/Uman): ")) return;
@@ -551,13 +768,22 @@ void modifyCandidat() {
                 cout << "  [Eroare] Profilul trebuie sa fie 'Real' sau 'Uman'.\n";
                 return;
             }
+            strncpy(newProfil, (strcmp(tmp, "real") == 0) ? "Real" : "Uman", MAX_FIELD);
             break;
         }
         case 4:
             if (!readNonEmptyLine(newLimba, MAX_FIELD, "Introduceti noua limba: ")) return;
+            if (!isValidAlphaField(newLimba)) {
+                cout << "  [Eroare] Limba nu poate contine cifre sau caractere speciale.\n"; return;
+            }
+            capitalizeWords(newLimba);
             break;
         case 5:
             if (!readNonEmptyLine(newDisc, MAX_FIELD, "Introduceti noua disciplina: ")) return;
+            if (!isValidAlphaField(newDisc)) {
+                cout << "  [Eroare] Disciplina nu poate contine cifre sau caractere speciale.\n"; return;
+            }
+            capitalizeWords(newDisc);
             break;
         case 6: {
             char nNume[MAX_NAME], nPrenume[MAX_NAME];
@@ -565,13 +791,25 @@ void modifyCandidat() {
             if (!(cin >> nNume) || !isNonEmpty(nNume)) {
                 recoverCin(); cout << "  [Eroare] Nume invalid.\n"; return;
             }
+            if (!isValidName(nNume)) {
+                recoverCin(); cout << "  [Eroare] Numele nu poate contine cifre sau caractere speciale.\n"; return;
+            }
+            capitalizeWords(nNume);
             cout << "Introduceti noul prenume: ";
             if (!(cin >> nPrenume) || !isNonEmpty(nPrenume)) {
                 recoverCin(); cout << "  [Eroare] Prenume invalid.\n"; return;
             }
+            if (!isValidName(nPrenume)) {
+                recoverCin(); cout << "  [Eroare] Prenumele nu poate contine cifre sau caractere speciale.\n"; return;
+            }
+            capitalizeWords(nPrenume);
             snprintf(newName, sizeof(newName), "%s %s", nNume, nPrenume);
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             if (!readNonEmptyLine(newScoala, MAX_FIELD, "Introduceti noua scoala: ")) return;
+            if (!isValidScoala(newScoala)) {
+                cout << "  [Eroare] Numele scolii contine caractere invalide.\n"; return;
+            }
+            capitalizeWords(newScoala);
             if (!readNonEmptyLine(newProfil, MAX_FIELD, "Introduceti noul profil (Real/Uman): ")) return;
             {
                 char tmp[MAX_FIELD]; trim(tmp, newProfil, MAX_FIELD); toLowerInPlace(tmp);
@@ -579,9 +817,32 @@ void modifyCandidat() {
                     cout << "  [Eroare] Profilul trebuie sa fie 'Real' sau 'Uman'.\n";
                     return;
                 }
+                strncpy(newProfil, (strcmp(tmp, "real") == 0) ? "Real" : "Uman", MAX_FIELD);
             }
             if (!readNonEmptyLine(newLimba, MAX_FIELD, "Introduceti noua limba: ")) return;
+            if (!isValidAlphaField(newLimba)) {
+                cout << "  [Eroare] Limba nu poate contine cifre sau caractere speciale.\n"; return;
+            }
+            capitalizeWords(newLimba);
             if (!readNonEmptyLine(newDisc, MAX_FIELD, "Introduceti noua disciplina: ")) return;
+            if (!isValidAlphaField(newDisc)) {
+                cout << "  [Eroare] Disciplina nu poate contine cifre sau caractere speciale.\n"; return;
+            }
+            capitalizeWords(newDisc);
+            break;
+        }
+        case 7: {
+            int candidateNewId;
+            if (!readPositiveInt(candidateNewId, "Introduceti noul ID: ")) return;
+            if (candidateNewId == foundId) {
+                cout << "  [Info] ID-ul introdus este identic cu cel curent. Nicio modificare.\n";
+                return;
+            }
+            if (candidateExists(candidateNewId)) {
+                cout << "  [Eroare] ID-ul " << candidateNewId << " este deja folosit de alt candidat.\n";
+                return;
+            }
+            newId = candidateNewId;
             break;
         }
         default:
@@ -590,18 +851,18 @@ void modifyCandidat() {
     }
 
     ostringstream oss;
-    oss << foundId
+    oss << newId
         << " | " << left << setw(23) << newName
         << " | " << setw(23) << newScoala
-        << " | " << setw(4) << newProfil
-        << " | " << setw(8) << newLimba
+        << " | " << setw(4)  << newProfil
+        << " | " << setw(8)  << newLimba
         << " | " << newDisc;
     string buf = oss.str();
 
     bool replaced = false;
     for (int i = 0; i < count; i++) {
-        int id; char cName[MAX_NAME], scoala[MAX_FIELD], profil[MAX_FIELD], limba[MAX_FIELD], disc[MAX_FIELD];
-        if (!replaced && parseCandidateLine(lines[i], id, cName, scoala, profil, limba, disc) &&
+        int id; char cName[MAX_NAME], sc[MAX_FIELD], pr[MAX_FIELD], lb[MAX_FIELD], di[MAX_FIELD];
+        if (!replaced && parseCandidateLine(lines[i], id, cName, sc, pr, lb, di) &&
             id == foundId && strcmp(cName, fullName) == 0) {
             strncpy(lines[i], buf.c_str(), MAX_LINE - 1);
             lines[i][MAX_LINE - 1] = '\0';
@@ -618,7 +879,32 @@ void modifyCandidat() {
     if (!fout) { cout << "  [Eroare] Nu se poate scrie in Candidat.txt\n"; return; }
     for (int i = 0; i < count; i++) fout << lines[i] << "\n";
     fout.close();
-    cout << "  Informatii candidat modificate.\n";
+    if (newId != foundId) {
+        ifstream finE("Examen.txt");
+        ofstream foutE("tempE.txt");
+        if (finE && foutE) {
+            char eline[MAX_LINE];
+            while (finE.getline(eline, MAX_LINE)) {
+                if (eline[0] == '\0' || eline[0] == '\r') continue;
+                int eid; double en1, en2, en3, en4;
+                if (parseExamLine(eline, eid, en1, en2, en3, en4) && eid == foundId) {
+                    foutE << fixed << setprecision(1)
+                          << newId << " " << en1 << " " << en2
+                          << " "   << en3 << " " << en4 << "\n";
+                    foutE.unsetf(ios::fixed);
+                } else {
+                    foutE << eline << "\n";
+                }
+            }
+            finE.close(); foutE.close();
+            remove("Examen.txt");
+            rename("tempE.txt", "Examen.txt");
+        }
+        cout << "  ID modificat din " << foundId << " in " << newId
+             << " (actualizat si in Examen.txt daca era prezent).\n";
+    } else {
+        cout << "  Informatii candidat modificate.\n";
+    }
 }
 
 void modifyGradesById() {
@@ -750,6 +1036,16 @@ void createAverageFile() {
             countE++;
     }
     finE.close();
+    bool anyMatch = false;
+    for (int i = 0; i < countC && !anyMatch; i++)
+        for (int j = 0; j < countE; j++)
+            if (examIds[j] == ids[i]) { anyMatch = true; break; }
+
+    if (!anyMatch) {
+        cout << "  [Eroare] Niciun candidat din Candidat.txt nu are note in Examen.txt.\n"
+             << "           Fisierul Average.txt nu a fost creat.\n";
+        return;
+    }
 
     ofstream fout("Average.txt");
     if (!fout) { cout << "  [Eroare] Nu se poate crea Average.txt\n"; return; }
@@ -775,6 +1071,12 @@ void showCandidatesByDiscipline() {
     cout << "Introduceti disciplina: ";
     cin.getline(discipline, MAX_DISC);
     if (!isNonEmpty(discipline)) { cout << "  [Eroare] Disciplina nu poate fi goala.\n"; return; }
+    {
+        char tmp[MAX_DISC]; trim(tmp, discipline, MAX_DISC);
+        if (!isValidAlphaField(tmp)) {
+            cout << "  [Eroare] Disciplina nu poate contine cifre sau caractere speciale.\n"; return;
+        }
+    }
 
     char wanted[MAX_DISC];
     trim(wanted, discipline, MAX_DISC);
