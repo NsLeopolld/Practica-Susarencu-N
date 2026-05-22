@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
-#include "func.h"
+#include "libraries/func.h"
 using namespace std;
 
 static void pause() {
@@ -23,7 +23,7 @@ int main() {
                 break;
 
             case 1: {
-                ifstream fin("Candidat.txt");
+                ifstream fin("data/Candidat.txt");
                 if (!fin) {
                     cout << "  [Eroare] Nu se poate deschide Candidat.txt\n";
                 } else {
@@ -34,7 +34,7 @@ int main() {
             }
 
             case 2: {
-                ifstream fin("Examen.txt");
+                ifstream fin("data/Examen.txt");
                 if (!fin) {
                     cout << "  [Eroare] Nu se poate deschide Examen.txt\n";
                 } else {

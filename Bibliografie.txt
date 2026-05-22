@@ -1,7 +1,0 @@
-Numele Prenumele - https://www.behindthename.com/random/
-Random Number - https://www.calculator.net/random-number-generator.html
-Ajutor pentru scrierea codului - https://www.w3schools.com/cpp/default.asp
-				 https://stackoverflow.com/questions
-				 https://www.geeksforgeeks.org/
-				 https://moodle1.ceiti.md/course/view.php?id=3744
-				 
