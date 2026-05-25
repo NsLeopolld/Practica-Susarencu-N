@@ -274,7 +274,7 @@ void printExamTable(ifstream &fin) {
 
 
 bool candidateExists(int id) {
-    ifstream f("Candidat.txt");
+    ifstream f("data/Candidat.txt");
     if (!f) return false;
     char line[MAX_LINE];
     while (f.getline(line, MAX_LINE)) {
@@ -285,7 +285,7 @@ bool candidateExists(int id) {
 }
 
 bool gradeExists(int id) {
-    ifstream f("Examen.txt");
+    ifstream f("data/Examen.txt");
     if (!f) return false;
     char line[MAX_LINE];
     int cid; double n1, n2, n3, n4;
@@ -295,7 +295,7 @@ bool gradeExists(int id) {
 }
 
 int getMaxCandidateId() {
-    ifstream fin("Candidat.txt");
+    ifstream fin("data/Candidat.txt");
     int maxId = 1000;
     char line[MAX_LINE];
     while (fin.getline(line, MAX_LINE)) {
@@ -409,8 +409,8 @@ void addCandidat() {
     }
     capitalizeWords(disciplina);
 
-    ofstream fout("Candidat.txt", ios::app);
-    if (!fout) { cout << "  [Eroare] Nu se poate scrie in Candidat.txt\n"; return; }
+    ofstream fout("data/Candidat.txt", ios::app);
+    if (!fout) { cout << "  [Eroare] Nu se poate scrie in data/Candidat.txt\n"; return; }
     ostringstream oss;
     oss << endl <<  newId
         << " | " << left << setw(23) << (string(nume) + " " + prenume)
@@ -428,7 +428,7 @@ void addGrades() {
     if (!readPositiveInt(id, "Introduceti ID-ul candidatului: ")) return;
 
     if (!candidateExists(id)) {
-        cout << "  [Eroare] Nu exista un candidat cu ID " << id << " in Candidat.txt.\n";
+        cout << "  [Eroare] Nu exista un candidat cu ID " << id << " in data/Candidat.txt.\n";
         return;
     }
     if (gradeExists(id)) {
@@ -443,8 +443,8 @@ void addGrades() {
     if (!readDouble(nota3, 1.0, 10.0, "Introduceti nota 3 (1-10): ")) return;
     if (!readDouble(nota4, 1.0, 10.0, "Introduceti nota 4 (1-10): ")) return;
 
-    ofstream fout("Examen.txt", ios::app);
-    if (!fout) { cout << "  [Eroare] Nu se poate scrie in Examen.txt\n"; return; }
+    ofstream fout("data/Examen.txt", ios::app);
+    if (!fout) { cout << "  [Eroare] Nu se poate scrie in data/Examen.txt\n"; return; }
     fout << fixed << setprecision(1)
          << id << " " << nota1 << " " << nota2 << " " << nota3 << " " << nota4 << endl;
     fout.close();
@@ -471,8 +471,8 @@ void deleteCandidat() {
     char fullName[MAX_NAME * 2];
     snprintf(fullName, sizeof(fullName), "%s %s", nume, prenume);
 
-    ifstream finC("Candidat.txt");
-    if (!finC) { cout << "  [Eroare] Nu se poate deschide Candidat.txt\n"; return; }
+    ifstream finC("data/Candidat.txt");
+    if (!finC) { cout << "  [Eroare] Nu se poate deschide data/Candidat.txt\n"; return; }
 
     char lines[MAX_CANDIDATES][MAX_LINE];
     int  count = 0;
@@ -535,8 +535,8 @@ void deleteCandidat() {
     }
 
     bool skipped = false;
-    ofstream foutC("Candidat.txt");
-    if (!foutC) { cout << "  [Eroare] Nu se poate scrie in Candidat.txt\n"; return; }
+    ofstream foutC("data/Candidat.txt");
+    if (!foutC) { cout << "  [Eroare] Nu se poate scrie in data/Candidat.txt\n"; return; }
     for (int i = 0; i < count; i++) {
         int id; char cName[MAX_NAME], sc[MAX_FIELD], pr[MAX_FIELD], lb[MAX_FIELD], di[MAX_FIELD];
         if (!skipped && parseCandidateLine(lines[i], id, cName, sc, pr, lb, di) &&
@@ -548,7 +548,7 @@ void deleteCandidat() {
     }
     foutC.close();
 
-    ifstream finE("Examen.txt");
+    ifstream finE("data/Examen.txt");
     ofstream foutE("tempE.txt");
     if (finE && foutE) {
         while (finE.getline(line, MAX_LINE)) {
@@ -558,8 +558,8 @@ void deleteCandidat() {
                 foutE << line << "\n";
         }
         finE.close(); foutE.close();
-        remove("Examen.txt");
-        rename("tempE.txt", "Examen.txt");
+        remove("data/Examen.txt");
+        rename("tempE.txt", "data/Examen.txt");
     }
     cout << "  Candidat '" << fullName << "' (ID " << idToDelete << ") sters.\n";
 }
@@ -568,8 +568,8 @@ void deleteGrades() {
     int id;
     if (!readPositiveInt(id, "Introduceti ID-ul candidatului: ")) return;
 
-    ifstream fin("Examen.txt");
-    if (!fin) { cout << "  [Eroare] Nu se poate deschide Examen.txt\n"; return; }
+    ifstream fin("data/Examen.txt");
+    if (!fin) { cout << "  [Eroare] Nu se poate deschide data/Examen.txt\n"; return; }
 
     char line[MAX_LINE];
     ofstream fout("tempE.txt");
@@ -583,11 +583,11 @@ void deleteGrades() {
         fout << line << "\n";
     }
     fin.close(); fout.close();
-    remove("Examen.txt");
-    rename("tempE.txt", "Examen.txt");
+    remove("data/Examen.txt");
+    rename("tempE.txt", "data/Examen.txt");
 
     if (found) cout << "  Note sterse pentru ID: " << id << "\n";
-    else        cout << "  [Eroare] ID " << id << " nu a fost gasit in Examen.txt\n";
+    else        cout << "  [Eroare] ID " << id << " nu a fost gasit in data/Examen.txt\n";
 }
 
 void modifyCandidat() {
@@ -610,8 +610,8 @@ void modifyCandidat() {
     char fullName[MAX_NAME * 2];
     snprintf(fullName, sizeof(fullName), "%s %s", nume, prenume);
 
-    ifstream fin("Candidat.txt");
-    if (!fin) { cout << "  [Eroare] Nu se poate deschide Candidat.txt\n"; return; }
+    ifstream fin("data/Candidat.txt");
+    if (!fin) { cout << "  [Eroare] Nu se poate deschide data/Candidat.txt\n"; return; }
 
     char lines[MAX_CANDIDATES][MAX_LINE];
     int  count = 0;
@@ -875,12 +875,12 @@ void modifyCandidat() {
         return;
     }
 
-    ofstream fout("Candidat.txt");
-    if (!fout) { cout << "  [Eroare] Nu se poate scrie in Candidat.txt\n"; return; }
+    ofstream fout("data/Candidat.txt");
+    if (!fout) { cout << "  [Eroare] Nu se poate scrie in data/Candidat.txt\n"; return; }
     for (int i = 0; i < count; i++) fout << lines[i] << "\n";
     fout.close();
     if (newId != foundId) {
-        ifstream finE("Examen.txt");
+        ifstream finE("data/Examen.txt");
         ofstream foutE("tempE.txt");
         if (finE && foutE) {
             char eline[MAX_LINE];
@@ -897,11 +897,11 @@ void modifyCandidat() {
                 }
             }
             finE.close(); foutE.close();
-            remove("Examen.txt");
-            rename("tempE.txt", "Examen.txt");
+            remove("data/Examen.txt");
+            rename("tempE.txt", "data/Examen.txt");
         }
         cout << "  ID modificat din " << foundId << " in " << newId
-             << " (actualizat si in Examen.txt daca era prezent).\n";
+             << " (actualizat si in data/Examen.txt daca era prezent).\n";
     } else {
         cout << "  Informatii candidat modificate.\n";
     }
@@ -911,15 +911,15 @@ void modifyGradesById() {
     int id;
     if (!readPositiveInt(id, "Introduceti ID-ul candidatului: ")) return;
     if (!candidateExists(id)) {
-        cout << "  [Eroare] Nu exista candidat cu ID " << id << " in Candidat.txt.\n"; return;
+        cout << "  [Eroare] Nu exista candidat cu ID " << id << " in data/Candidat.txt.\n"; return;
     }
     if (!gradeExists(id)) {
         cout << "  [Eroare] Nu exista note pentru ID " << id
              << ". Folositi optiunea 4 pentru adaugare.\n"; return;
     }
 
-    ifstream fin("Examen.txt");
-    if (!fin) { cout << "  [Eroare] Nu se poate deschide Examen.txt\n"; return; }
+    ifstream fin("data/Examen.txt");
+    if (!fin) { cout << "  [Eroare] Nu se poate deschide data/Examen.txt\n"; return; }
 
     char lines[MAX_CANDIDATES][MAX_LINE];
     int  count = 0;
@@ -999,18 +999,18 @@ void modifyGradesById() {
 
     snprintf(lines[foundIndex], MAX_LINE, "%d %.2f %.2f %.2f %.2f", id, nn1, nn2, nn3, nn4);
 
-    ofstream fout("Examen.txt");
-    if (!fout) { cout << "  [Eroare] Nu se poate scrie in Examen.txt\n"; return; }
+    ofstream fout("data/Examen.txt");
+    if (!fout) { cout << "  [Eroare] Nu se poate scrie in data/Examen.txt\n"; return; }
     for (int i = 0; i < count; i++) fout << lines[i] << "\n";
     fout.close();
     cout << "  Note modificate pentru ID: " << id << "\n";
 }
 
 void createAverageFile() {
-    ifstream finC("Candidat.txt");
-    ifstream finE("Examen.txt");
-    if (!finC) { cout << "  [Eroare] Nu se poate deschide Candidat.txt\n"; return; }
-    if (!finE) { cout << "  [Eroare] Nu se poate deschide Examen.txt\n";   return; }
+    ifstream finC("data/Candidat.txt");
+    ifstream finE("data/Examen.txt");
+    if (!finC) { cout << "  [Eroare] Nu se poate deschide data/Candidat.txt\n"; return; }
+    if (!finE) { cout << "  [Eroare] Nu se poate deschide data/Examen.txt\n";   return; }
 
     int    ids[MAX_CANDIDATES];
     char   candidateLines[MAX_CANDIDATES][MAX_LINE];
@@ -1042,7 +1042,7 @@ void createAverageFile() {
             if (examIds[j] == ids[i]) { anyMatch = true; break; }
 
     if (!anyMatch) {
-        cout << "  [Eroare] Niciun candidat din Candidat.txt nu are note in Examen.txt.\n"
+        cout << "  [Eroare] Niciun candidat din data/Candidat.txt nu are note in data/Examen.txt.\n"
              << "           Fisierul Average.txt nu a fost creat.\n";
         return;
     }
@@ -1082,8 +1082,8 @@ void showCandidatesByDiscipline() {
     trim(wanted, discipline, MAX_DISC);
     toLowerInPlace(wanted);
 
-    ifstream fin("Candidat.txt");
-    if (!fin) { cout << "  [Eroare] Nu se poate deschide Candidat.txt\n"; return; }
+    ifstream fin("data/Candidat.txt");
+    if (!fin) { cout << "  [Eroare] Nu se poate deschide data/Candidat.txt\n"; return; }
 
     char matchedLines[MAX_CANDIDATES][MAX_LINE];
     char matchedNames[MAX_CANDIDATES][MAX_NAME];
@@ -1131,8 +1131,8 @@ void showCandidatesByDiscipline() {
 }
 
 void showTopAverageCandidate() {
-    ifstream finE("Examen.txt");
-    if (!finE) { cout << "  [Eroare] Nu se poate deschide Examen.txt\n"; return; }
+    ifstream finE("data/Examen.txt");
+    if (!finE) { cout << "  [Eroare] Nu se poate deschide data/Examen.txt\n"; return; }
 
     int    bestId = -1;
     double bestAvg = -1.0;
@@ -1149,8 +1149,8 @@ void showTopAverageCandidate() {
 
     if (bestId == -1) { cout << "  [Eroare] Nu exista date de examen.\n"; return; }
 
-    ifstream finC("Candidat.txt");
-    if (!finC) { cout << "  [Eroare] Nu se poate deschide Candidat.txt\n"; return; }
+    ifstream finC("data/Candidat.txt");
+    if (!finC) { cout << "  [Eroare] Nu se poate deschide data/Candidat.txt\n"; return; }
 
     bool found = false;
     while (finC.getline(line, MAX_LINE)) {
@@ -1171,12 +1171,12 @@ void showTopAverageCandidate() {
     }
     finC.close();
     if (!found)
-        cout << "  [Eroare] Candidatul cu ID " << bestId << " nu a fost gasit in Candidat.txt.\n";
+        cout << "  [Eroare] Candidatul cu ID " << bestId << " nu a fost gasit in data/Candidat.txt.\n";
 }
 
 void countRestantieri() {
-    ifstream fin("Examen.txt");
-    if (!fin) { cout << "  [Eroare] Nu se poate deschide Examen.txt\n"; return; }
+    ifstream fin("data/Examen.txt");
+    if (!fin) { cout << "  [Eroare] Nu se poate deschide data/Examen.txt\n"; return; }
 
     char line[MAX_LINE];
     int  count = 0;
