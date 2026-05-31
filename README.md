@@ -2,7 +2,7 @@
 ### Realizat de Susarencu Nikita
 In Proiectul dat am relizat sarcina Nr. 28 cu numele "BAC",
 
-> 1. Afișarea pe ecran a informației despre toți candidații.
+`1. Afișarea pe ecran a informației despre toți candidații.`
 >2. Afișarea pe ecran a informației despre toate notele de examen.
 >3. Adăugarea informației despre un candidat nou.
 >4. Adăugarea informației despre notele de examen ale candidatului adăugat la punctul 1.
