@@ -1,8 +1,7 @@
-# Practica de INIȚIERE în specialitate
-## Realizat de Susarencu Nikita
-### Sarcina Nr. 28 cu numele "BAC".
+# Practica de INIȚIERE în specialitate Realizat de Susarencu Nikita
+## Sarcina Nr. 28 cu numele "BAC".
 
-în codul sursa de mai sus sunt sarcinile din lista de mai jos. Aplicatii
+în codul sursa de mai sus sunt sarcinile din lista de mai jos. Aplicatii de tip console-based app are meniu din care sunt selectate sarcinile dorite de catre utilizator.
 
 >1. Afișarea pe ecran a informației despre toți candidații.
 >2. Afișarea pe ecran a informației despre toate notele de examen.
