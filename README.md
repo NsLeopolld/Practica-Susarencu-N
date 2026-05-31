@@ -1,8 +1,10 @@
-# Practica de Initiere in Profesie 
-### Realizat de Susarencu Nikita
-In Proiectul dat am relizat sarcina Nr. 28 cu numele "BAC",
+# Practica de INIȚIERE în specialitate
+## Realizat de Susarencu Nikita
+### Sarcina Nr. 28 cu numele "BAC".
 
-`1. Afișarea pe ecran a informației despre toți candidații.`
+în codul sursa de mai sus sunt sarcinile din lista de mai jos. Aplicatii
+
+>1. Afișarea pe ecran a informației despre toți candidații.
 >2. Afișarea pe ecran a informației despre toate notele de examen.
 >3. Adăugarea informației despre un candidat nou.
 >4. Adăugarea informației despre notele de examen ale candidatului adăugat la punctul 1.
